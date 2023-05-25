@@ -1,0 +1,654 @@
+Script started on 2023-05-24 11:49:56+03:00 [TERM="xterm-256color" TTY="/dev/pts/0" COLUMNS="150" LINES="55"]
+]0;falcon@ubuntu-pc: ~/OTUS-Linux-2023-04-L3[01;32mfalcon@ubuntu-pc[00m:[01;34m~/OTUS-Linux-2023-04-L3[00m$ vagrant ssh
+Last login: Tue May 23 14:58:41 2023 from 10.0.2.2
+
+]0;vagrant@lvm:~[?1034h[vagrant@lvm ~]$ lsblk 
+NAME                    MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sda                       8:0    0   10G  0 disk 
+└─VG--ROOT-lv--root     253:0    0   10G  0 lvm  /
+sdb                       8:16   0    2G  0 disk 
+sdc                       8:32   0    1G  0 disk 
+sdd                       8:48   0    1G  0 disk 
+sde                       8:64   0   40G  0 disk 
+├─sde1                    8:65   0    1M  0 part 
+├─sde2                    8:66   0    1G  0 part /boot
+└─sde3                    8:67   0   39G  0 part 
+  ├─VolGroup00-LogVol01 253:1    0  1.5G  0 lvm  [SWAP]
+  └─VolGroup00-LogVol00 253:2    0 37.5G  0 lvm  
+]0;vagrant@lvm:~[vagrant@lvm ~]$ lvd[Ks
+  WARNING: Running as a non-root user. Functionality may be unavailable.
+  /run/lvm/lvmetad.socket: access failed: Permission denied
+  WARNING: Failed to connect to lvmetad. Falling back to device scanning.
+  /dev/mapper/control: open failed: Permission denied
+  Failure to communicate with kernel device-mapper driver.
+  Incompatible libdevmapper 1.02.146-RHEL7 (2018-01-22) and kernel driver (unknown version).
+]0;vagrant@lvm:~[vagrant@lvm ~]$ sudo -i
+]0;root@lvm:~[?1034h[root@lvm ~]# lvs
+  LV       VG         Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+  lv-root  VG-ROOT    -wi-ao---- <10.00g                                                    
+  LogVol00 VolGroup00 -wi-a----- <37.47g                                                    
+  LogVol01 VolGroup00 -wi-ao----   1.50g                                                    
+]0;root@lvm:~[root@lvm ~]# lvremove LogVol01[K[K[K[K[K[K[K[K/dev/VolGroup00/LogVol00 
+Do you really want to remove active logical volume VolGroup00/LogVol00? [y/n]: y
+  Logical volume "LogVol00" successfully removed
+]0;root@lvm:~[root@lvm ~]# lvs
+  LV       VG         Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+  lv-root  VG-ROOT    -wi-ao---- <10.00g                                                    
+  LogVol01 VolGroup00 -wi-ao----   1.50g                                                    
+]0;root@lvm:~[root@lvm ~]# lvcreate 
+  No command with matching syntax recognised.  Run 'lvcreate --help' for more information.
+]0;root@lvm:~[root@lvm ~]# 
+]0;root@lvm:~[root@lvm ~]# lvcreate -n VolGroup00/LogVol00 -L 8G /dev/VolGroup00[C[1P[1P[1P[1P[1P[1P[1P[1P[1P[1P[1P
+WARNING: xfs signature detected on /dev/VolGroup00/LogVol00 at offset 0. Wipe it? [y/n]: y
+  Wiping xfs signature on /dev/VolGroup00/LogVol00.
+  Logical volume "LogVol00" created.
+]0;root@lvm:~[root@lvm ~]# lvcreate -n LogVol00 -L 8G /dev/VolGroup00
+[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[Ks[K
+  LV       VG         Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+  lv-root  VG-ROOT    -wi-ao---- <10.00g                                                    
+  LogVol00 VolGroup00 -wi-a-----   8.00g                                                    
+  LogVol01 VolGroup00 -wi-ao----   1.50g                                                    
+]0;root@lvm:~[root@lvm ~]# 
+]0;root@lvm:~[root@lvm ~]# 
+]0;root@lvm:~[root@lvm ~]# 
+]0;root@lvm:~[root@lvm ~]# mkfs.xfs /dev/VolGroup00/LogVol00
+meta-data=/dev/VolGroup00/LogVol00 isize=512    agcount=4, agsize=524288 blks
+         =                       sectsz=512   attr=2, projid32bit=1
+         =                       crc=1        finobt=0, sparse=0
+data     =                       bsize=4096   blocks=2097152, imaxpct=25
+         =                       sunit=0      swidth=0 blks
+naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
+log      =internal log           bsize=4096   blocks=2560, version=2
+         =                       sectsz=512   sunit=0 blks, lazy-count=1
+realtime =none                   extsz=4096   blocks=0, rtextents=0
+]0;root@lvm:~[root@lvm ~]# 
+]0;root@lvm:~[root@lvm ~]# df -lT
+Filesystem                    Type     1K-blocks   Used Available Use% Mounted on
+/dev/mapper/VG--ROOT-lv--root xfs       10471424 877068   9594356   9% /
+devtmpfs                      devtmpfs    111876      0    111876   0% /dev
+tmpfs                         tmpfs       120692      0    120692   0% /dev/shm
+tmpfs                         tmpfs       120692   4612    116080   4% /run
+tmpfs                         tmpfs       120692      0    120692   0% /sys/fs/cgroup
+/dev/sde2                     xfs        1038336  62216    976120   6% /boot
+tmpfs                         tmpfs        24140      0     24140   0% /run/user/1000
+]0;root@lvm:~[root@lvm ~]# mount /dev/VolGroup00/LogVol00 /mnt
+]0;root@lvm:~[root@lvm ~]# mount /dev/VolGroup00/LogVol00 /mnt
+]0;root@lvm:~[root@lvm ~]# df -lT[K
+Filesystem                      Type     1K-blocks   Used Available Use% Mounted on
+/dev/mapper/VG--ROOT-lv--root   xfs       10471424 877088   9594336   9% /
+devtmpfs                        devtmpfs    111876      0    111876   0% /dev
+tmpfs                           tmpfs       120692      0    120692   0% /dev/shm
+tmpfs                           tmpfs       120692   4612    116080   4% /run
+tmpfs                           tmpfs       120692      0    120692   0% /sys/fs/cgroup
+/dev/sde2                       xfs        1038336  62216    976120   6% /boot
+tmpfs                           tmpfs        24140      0     24140   0% /run/user/1000
+/dev/mapper/VolGroup00-LogVol00 xfs        8378368  32944   8345424   1% /mnt
+]0;root@lvm:~[root@lvm ~]# 
+]0;root@lvm:~[root@lvm ~]# 
+]0;root@lvm:~[root@lvm ~]# 
+]0;root@lvm:~[root@lvm ~]# 
+]0;root@lvm:~[root@lvm ~]# ls -lh /mnt/[Kxfsdump -J /dev/VG-ROOT/lv-root | xfsrestore -J - /mnt
+]0;root@lvm:~[root@lvm ~]# df -lT[K
+Filesystem                      Type     1K-blocks   Used Available Use% Mounted on
+/dev/mapper/VG--ROOT-lv--root   xfs       10471424 877068   9594356   9% /
+devtmpfs                        devtmpfs    111876      0    111876   0% /dev
+tmpfs                           tmpfs       120692      0    120692   0% /dev/shm
+tmpfs                           tmpfs       120692   4612    116080   4% /run
+tmpfs                           tmpfs       120692      0    120692   0% /sys/fs/cgroup
+/dev/sde2                       xfs        1038336  62216    976120   6% /boot
+tmpfs                           tmpfs        24140      0     24140   0% /run/user/1000
+/dev/mapper/VolGroup00-LogVol00 xfs        8378368  32944   8345424   1% /mnt
+]0;root@lvm:~[root@lvm ~]# df -lTxfsdump -J /dev/VG-ROOT/lv-root|xfsrestore -J - /mnt[C[1@ [1@-
+xfsrestore: using file dump (drive_simple) strategy
+xfsrestore: version 3.1.7 (dump format 3.0)
+xfsdump: using file dump (drive_simple) strategy
+xfsdump: version 3.1.7 (dump format 3.0)
+xfsdump: level 0 dump of lvm:/
+xfsdump: dump date: Tue May 23 19:35:27 2023
+xfsdump: session id: 24ebd2f0-bd3b-49b5-834f-685f48f4a952
+xfsdump: session label: ""
+xfsrestore: searching media for dump
+xfsdump: ino map phase 1: constructing initial dump list
+xfsdump: ino map phase 2: skipping (no pruning necessary)
+xfsdump: ino map phase 3: skipping (only one dump stream)
+xfsdump: ino map construction complete
+xfsdump: estimated dump size: 859198848 bytes
+xfsdump: creating dump session media file 0 (media 0, file 0)
+xfsdump: dumping ino map
+xfsdump: dumping directories
+xfsrestore: examining media file 0
+xfsrestore: dump description: 
+xfsrestore: hostname: lvm
+xfsrestore: mount point: /
+xfsrestore: volume: /dev/mapper/VG--ROOT-lv--root
+xfsrestore: session time: Tue May 23 19:35:27 2023
+xfsrestore: level: 0
+xfsrestore: session label: ""
+xfsrestore: media label: ""
+xfsrestore: file system id: e5c316c5-430f-40b9-98eb-7781948ae8ca
+xfsrestore: session id: 24ebd2f0-bd3b-49b5-834f-685f48f4a952
+xfsrestore: media id: 60a90632-b71c-4f7b-b37c-c52ebb6def59
+xfsrestore: searching media for directory dump
+xfsrestore: reading directories
+xfsdump: dumping non-directory files
+xfsrestore: 2722 directories and 23646 entries processed
+xfsrestore: directory post-processing
+xfsrestore: restoring non-directory files
+xfsdump: ending media file
+xfsdump: media file size 836229440 bytes
+xfsdump: dump size (non-dir files) : 823040480 bytes
+xfsdump: dump complete: 21 seconds elapsed
+xfsdump: Dump Status: SUCCESS
+xfsrestore: restore complete: 22 seconds elapsed
+xfsrestore: Restore Status: SUCCESS
+]0;root@lvm:~[root@lvm ~]# xfsdump -J - /dev/VG-ROOT/lv-root|xfsrestore -J - /mnt
+]0;root@lvm:~[root@lvm ~]# df -lT[Kxfsdump -J /dev/VG-ROOT/lv-root|xfsrestore -J - /mnt
+]0;root@lvm:~[root@lvm ~]# ls -lh /mnt/[K
+total 12K
+lrwxrwxrwx.  1 root    root       7 May 23 19:35 [0m[38;5;51mbin[0m -> [38;5;27musr/bin[0m
+drwxr-xr-x.  2 root    root       6 May 12  2018 [38;5;27mboot[0m
+drwxr-xr-x.  2 root    root       6 May 12  2018 [38;5;27mdev[0m
+drwxr-xr-x. 79 root    root    8.0K May 23 13:29 [38;5;27metc[0m
+drwxr-xr-x.  3 root    root      21 May 12  2018 [38;5;27mhome[0m
+lrwxrwxrwx.  1 root    root       7 May 23 19:35 [38;5;51mlib[0m -> [38;5;27musr/lib[0m
+lrwxrwxrwx.  1 root    root       9 May 23 19:35 [38;5;51mlib64[0m -> [38;5;27musr/lib64[0m
+drwxr-xr-x.  2 root    root       6 Apr 11  2018 [38;5;27mmedia[0m
+drwxr-xr-x.  2 root    root       6 Apr 11  2018 [38;5;27mmnt[0m
+drwxr-xr-x.  2 root    root       6 Apr 11  2018 [38;5;27mopt[0m
+drwxr-xr-x.  2 root    root       6 May 12  2018 [38;5;27mproc[0m
+dr-xr-x---.  3 root    root     204 May 23 12:04 [38;5;27mroot[0m
+drwxr-xr-x.  2 root    root       6 May 12  2018 [38;5;27mrun[0m
+lrwxrwxrwx.  1 root    root       8 May 23 19:35 [38;5;51msbin[0m -> [38;5;27musr/sbin[0m
+drwxr-xr-x.  2 root    root       6 Apr 11  2018 [38;5;27msrv[0m
+drwxr-xr-x.  2 root    root       6 May 12  2018 [38;5;27msys[0m
+drwxrwxrwt.  9 root    root     272 May 23 19:33 [48;5;10;38;5;16mtmp[0m
+drwxr-xr-x. 13 root    root     155 May 12  2018 [38;5;27musr[0m
+drwxrwxr-x.  2 vagrant vagrant   25 May 23 09:26 [38;5;27mvagrant[0m
+drwxr-xr-x. 18 root    root     254 May 23 09:27 [38;5;27mvar[0m
+]0;root@lvm:~[root@lvm ~]# 
+]0;root@lvm:~[root@lvm ~]# 
+]0;root@lvm:~[root@lvm ~]# 
+]0;root@lvm:~[root@lvm ~]# for i in /proc/ /sys/ /dev/ /run/ /boot/; do mount --bind $i /mnt/$i; done
+]0;root@lvm:~[root@lvm ~]# chroot /mnt/
+]0;root@lvm:/[?1034h[root@lvm /]# grub2-mkconfig -o /boot/grub2/grub.cfg
+Generating grub configuration file ...
+Found linux image: /boot/vmlinuz-3.10.0-862.2.3.el7.x86_64
+Found initrd image: /boot/initramfs-3.10.0-862.2.3.el7.x86_64.img
+done
+]0;root@lvm:/[root@lvm /]# 
+]0;root@lvm:/[root@lvm /]# cd /boot ; for i in `ls initramfs-*img`; do dracut -v $i `echo $i|sed "s/initramfs-//g;  s/.img//g"` --force; done
+Executing: /sbin/dracut -v initramfs-3.10.0-862.2.3.el7.x86_64.img 3.10.0-862.2.3.el7.x86_64 --force
+dracut module 'busybox' will not be installed, because command 'busybox' could not be found!
+dracut module 'crypt' will not be installed, because command 'cryptsetup' could not be found!
+dracut module 'dmraid' will not be installed, because command 'dmraid' could not be found!
+dracut module 'dmsquash-live-ntfs' will not be installed, because command 'ntfs-3g' could not be found!
+dracut module 'multipath' will not be installed, because command 'multipath' could not be found!
+dracut module 'busybox' will not be installed, because command 'busybox' could not be found!
+dracut module 'crypt' will not be installed, because command 'cryptsetup' could not be found!
+dracut module 'dmraid' will not be installed, because command 'dmraid' could not be found!
+dracut module 'dmsquash-live-ntfs' will not be installed, because command 'ntfs-3g' could not be found!
+dracut module 'multipath' will not be installed, because command 'multipath' could not be found!
+*** Including module: bash ***
+*** Including module: nss-softokn ***
+*** Including module: i18n ***
+*** Including module: drm ***
+*** Including module: plymouth ***
+*** Including module: dm ***
+Skipping udev rule: 64-device-mapper.rules
+Skipping udev rule: 60-persistent-storage-dm.rules
+Skipping udev rule: 55-dm.rules
+*** Including module: kernel-modules ***
+Omitting driver floppy
+*** Including module: lvm ***
+Skipping udev rule: 64-device-mapper.rules
+Skipping udev rule: 56-lvm.rules
+Skipping udev rule: 60-persistent-storage-lvm.rules
+*** Including module: qemu ***
+*** Including module: resume ***
+*** Including module: rootfs-block ***
+*** Including module: terminfo ***
+*** Including module: udev-rules ***
+Skipping udev rule: 40-redhat-cpu-hotplug.rules
+Skipping udev rule: 91-permissions.rules
+*** Including module: biosdevname ***
+*** Including module: systemd ***
+*** Including module: usrmount ***
+*** Including module: base ***
+*** Including module: fs-lib ***
+*** Including module: shutdown ***
+*** Including modules done ***
+*** Installing kernel module dependencies and firmware ***
+*** Installing kernel module dependencies and firmware done ***
+*** Resolving executable dependencies ***
+*** Resolving executable dependencies done***
+*** Hardlinking files ***
+*** Hardlinking files done ***
+*** Stripping files ***
+*** Stripping files done ***
+*** Generating early-microcode cpio image contents ***
+*** No early-microcode cpio image needed ***
+*** Store current command line parameters ***
+*** Creating image file ***
+*** Creating image file done ***
+*** Creating initramfs image file '/boot/initramfs-3.10.0-862.2.3.el7.x86_64.img' done ***
+]0;root@lvm:/boot[root@lvm boot]# pvs
+  PV         VG         Fmt  Attr PSize   PFree  
+  /dev/sda   VG-ROOT    lvm2 a--  <10.00g      0 
+  /dev/sde3  VolGroup00 lvm2 a--  <38.97g <29.47g
+]0;root@lvm:/boot[root@lvm boot]# lsblk 
+NAME                    MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sda                       8:0    0   10G  0 disk 
+└─VG--ROOT-lv--root     253:0    0   10G  0 lvm  
+sdb                       8:16   0    2G  0 disk 
+sdc                       8:32   0    1G  0 disk 
+sdd                       8:48   0    1G  0 disk 
+sde                       8:64   0   40G  0 disk 
+├─sde1                    8:65   0    1M  0 part 
+├─sde2                    8:66   0    1G  0 part /boot
+└─sde3                    8:67   0   39G  0 part 
+  ├─VolGroup00-LogVol01 253:1    0  1.5G  0 lvm  [SWAP]
+  └─VolGroup00-LogVol00 253:2    0    8G  0 lvm  /
+]0;root@lvm:/boot[root@lvm boot]# pvcreate /dev/sdc[K{}c},}d}
+  Physical volume "/dev/sdc" successfully created.
+  Physical volume "/dev/sdd" successfully created.
+]0;root@lvm:/boot[root@lvm boot]# vgcreate vg_var /dev/sdc /dev/sdd
+  Volume group "vg_var" successfully created
+]0;root@lvm:/boot[root@lvm boot]# lvcreate -L 950M -m1 -n lv_var vg_var
+  Rounding up size to full physical extent 952.00 MiB
+  Logical volume "lv_var" created.
+]0;root@lvm:/boot[root@lvm boot]# 
+]0;root@lvm:/boot[root@lvm boot]# lvs
+  LV       VG         Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+  lv-root  VG-ROOT    -wi-ao---- <10.00g                                                    
+  LogVol00 VolGroup00 -wi-ao----   8.00g                                                    
+  LogVol01 VolGroup00 -wi-ao----   1.50g                                                    
+  lv_var   vg_var     rwi-a-r--- 952.00m                                    100.00          
+]0;root@lvm:/boot[root@lvm boot]# lvdisplay /VG-R[K[K[K[K[Kl[Klv-[K[K[K--[K[K[K[K[K[K[K[K[K[K[K[Klvscreate -L 950M -m1 -n lv_var vg_var
+[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[Cs[K
+  LV       VG         Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+  lv-root  VG-ROOT    -wi-ao---- <10.00g                                                    
+  LogVol00 VolGroup00 -wi-ao----   8.00g                                                    
+  LogVol01 VolGroup00 -wi-ao----   1.50g                                                    
+  lv_var   vg_var     rwi-a-r--- 952.00m                                    100.00          
+]0;root@lvm:/boot[root@lvm boot]# 
+]0;root@lvm:/boot[root@lvm boot]# 
+]0;root@lvm:/boot[root@lvm boot]# 
+]0;root@lvm:/boot[root@lvm boot]# lvs[K[Klvs[Klvdisplay vg_var/lv_var
+  --- Logical volume ---
+  LV Path                /dev/vg_var/lv_var
+  LV Name                lv_var
+  VG Name                vg_var
+  LV UUID                uUEDwP-7Jaf-Vm80-xKMk-pnLF-MMjx-13d0dB
+  LV Write Access        read/write
+  LV Creation host, time lvm, 2023-05-23 19:45:52 +0000
+  LV Status              available
+  # open                 0
+  LV Size                952.00 MiB
+  Current LE             238
+  Mirrored volumes       2
+  Segments               1
+  Allocation             inherit
+  Read ahead sectors     auto
+  - currently set to     8192
+  Block device           253:7
+   
+]0;root@lvm:/boot[root@lvm boot]# mkfs.ext4 /dev/vg_var/lv_var
+mke2fs 1.42.9 (28-Dec-2013)
+Filesystem label=
+OS type: Linux
+Block size=4096 (log=2)
+Fragment size=4096 (log=2)
+Stride=0 blocks, Stripe width=0 blocks
+60928 inodes, 243712 blocks
+12185 blocks (5.00%) reserved for the super user
+First data block=0
+Maximum filesystem blocks=249561088
+8 block groups
+32768 blocks per group, 32768 fragments per group
+7616 inodes per group
+Superblock backups stored on blocks: 
+	32768, 98304, 163840, 229376
+
+Allocating group tables: 0/8   done                            
+Writing inode tables: 0/8   done                            
+Creating journal (4096 blocks): done
+Writing superblocks and filesystem accounting information: 0/8   done
+
+]0;root@lvm:/boot[root@lvm boot]# ls -lh /mnt/
+total 0
+]0;root@lvm:/boot[root@lvm boot]# df -Th
+Filesystem                      Type      Size  Used Avail Use% Mounted on
+/dev/mapper/VolGroup00-LogVol00 xfs       8.0G  857M  7.2G  11% /
+devtmpfs                        devtmpfs  110M     0  110M   0% /dev
+tmpfs                           tmpfs     118M  4.6M  114M   4% /run
+/dev/sde2                       xfs      1014M   61M  954M   6% /boot
+]0;root@lvm:/boot[root@lvm boot]# mount /dev/vg_var/lv_var /mnt
+]0;root@lvm:/boot[root@lvm boot]# mount /dev/vg_var/lv_var /mnt
+[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[Cdf -Th[K
+Filesystem                      Type      Size  Used Avail Use% Mounted on
+/dev/mapper/VolGroup00-LogVol00 xfs       8.0G  857M  7.2G  11% /
+devtmpfs                        devtmpfs  110M     0  110M   0% /dev
+tmpfs                           tmpfs     118M  4.6M  114M   4% /run
+/dev/sde2                       xfs      1014M   61M  954M   6% /boot
+/dev/mapper/vg_var-lv_var       ext4      922M  2.4M  856M   1% /mnt
+]0;root@lvm:/boot[root@lvm boot]# cp -aR /var/* /mnt/ # rsync -avHPSAX /var/ /mnt/
+]0;root@lvm:/boot[root@lvm boot]# rm /va[K[K[K-fr /va
+vagrant/ var/     
+[root@lvm boot]# rm -fr /va
+vagrant/ var/     
+[root@lvm boot]# rm -fr /var/8[K*
+]0;root@lvm:/boot[root@lvm boot]# umount /mnt 
+]0;root@lvm:/boot[root@lvm boot]# mount /dev/vg_var/lv_var /var
+]0;root@lvm:/boot[root@lvm boot]# ls -l /var
+total 80
+drwxr-xr-x.  2 root root  4096 Apr 11  2018 [0m[38;5;27madm[0m
+drwxr-xr-x.  5 root root  4096 May 12  2018 [38;5;27mcache[0m
+drwxr-xr-x.  3 root root  4096 May 12  2018 [38;5;27mdb[0m
+drwxr-xr-x.  3 root root  4096 May 12  2018 [38;5;27mempty[0m
+drwxr-xr-x.  2 root root  4096 Apr 11  2018 [38;5;27mgames[0m
+drwxr-xr-x.  2 root root  4096 Apr 11  2018 [38;5;27mgopher[0m
+drwxr-xr-x.  3 root root  4096 May 12  2018 [38;5;27mkerberos[0m
+drwxr-xr-x. 28 root root  4096 May 23 19:35 [38;5;27mlib[0m
+drwxr-xr-x.  2 root root  4096 Apr 11  2018 [38;5;27mlocal[0m
+lrwxrwxrwx.  1 root root    11 May 23 19:35 [38;5;51mlock[0m -> [38;5;27m../run/lock[0m
+drwxr-xr-x.  8 root root  4096 May 23 13:29 [38;5;27mlog[0m
+drwx------.  2 root root 16384 May 23 19:49 [38;5;27mlost+found[0m
+lrwxrwxrwx.  1 root root    10 May 23 19:35 [38;5;51mmail[0m -> [38;5;27mspool/mail[0m
+drwxr-xr-x.  2 root root  4096 Apr 11  2018 [38;5;27mnis[0m
+drwxr-xr-x.  2 root root  4096 Apr 11  2018 [38;5;27mopt[0m
+drwxr-xr-x.  2 root root  4096 Apr 11  2018 [38;5;27mpreserve[0m
+lrwxrwxrwx.  1 root root     6 May 23 19:35 [38;5;51mrun[0m -> [38;5;27m../run[0m
+drwxr-xr-x.  8 root root  4096 May 12  2018 [38;5;27mspool[0m
+drwxrwxrwt.  4 root root  4096 May 23 19:41 [48;5;10;38;5;16mtmp[0m
+drwxr-xr-x.  2 root root  4096 Apr 11  2018 [38;5;27myp[0m
+]0;root@lvm:/boot[root@lvm boot]# echo "`blkid | grep var: | awk '{print $2}'` /var ext4 defaults 0 0" >> /etc/fstab
+]0;root@lvm:/boot[root@lvm boot]# cat /etc/fstab 
+
+#
+# /etc/fstab
+# Created by anaconda on Sat May 12 18:50:26 2018
+#
+# Accessible filesystems, by reference, are maintained under '/dev/disk'
+# See man pages fstab(5), findfs(8), mount(8) and/or blkid(8) for more info
+#
+/dev/mapper/VolGroup00-LogVol00 /                       xfs     defaults        0 0
+UUID=570897ca-e759-4c81-90cf-389da6eee4cc /boot                   xfs     defaults        0 0
+/dev/mapper/VolGroup00-LogVol01 swap                    swap    defaults        0 0
+#VAGRANT-BEGIN
+# The contents below are automatically generated by Vagrant. Do not modify.
+#VAGRANT-END
+UUID="eb95b097-e31f-4eeb-b4fc-5022dab48d72" /var ext4 defaults 0 0
+]0;root@lvm:/boot[root@lvm boot]# 
+]0;root@lvm:/boot[root@lvm boot]# 
+]0;root@lvm:/boot[root@lvm boot]# 
+]0;root@lvm:/boot[root@lvm boot]# shutdown -r 0
+Running in chroot, ignoring request.
+]0;root@lvm:/boot[root@lvm boot]# shutdown -r 0[Kexit
+exit
+]0;root@lvm:~[root@lvm ~]# chroot /mnt/for i in /proc/ /sys/ /dev/ /run/ /boot/; do mount --bind $i /mnt/$i; done
+[C[C[C[C[C[C[C[C[C[C[C[C[C[Cchroot /mnt/[K[Kshutdown -r 0
+Shutdown scheduled for Tue 2023-05-23 20:00:06 UTC, use 'shutdown -c' to cancel.
+]0;root@lvm:~[root@lvm ~]# Connection to 127.0.0.1 closed by remote host.
+
+Connection to 127.0.0.1 closed.
+
+]0;falcon@ubuntu-pc: ~/OTUS-Linux-2023-04-L3[01;32mfalcon@ubuntu-pc[00m:[01;34m~/OTUS-Linux-2023-04-L3[00m$ vagrant ssh
+]0;falcon@ubuntu-pc: ~/OTUS-Linux-2023-04-L3[01;32mfalcon@ubuntu-pc[00m:[01;34m~/OTUS-Linux-2023-04-L3[00m$ vagrant suspend
+[1m==> lvm: Saving VM state and suspending execution...[0m
+]0;falcon@ubuntu-pc: ~/OTUS-Linux-2023-04-L3[01;32mfalcon@ubuntu-pc[00m:[01;34m~/OTUS-Linux-2023-04-L3[00m$ vagrant up
+[0mBringing machine 'lvm' up with 'virtualbox' provider...[0m
+[1m==> lvm: Checking if box 'centos/7' version '1804.02' is up to date...[0m
+[1m==> lvm: Resuming suspended VM...[0m
+[1m==> lvm: Booting VM...[0m
+[1m==> lvm: Waiting for machine to boot. This may take a few minutes...[0m
+[0m    lvm: SSH address: 127.0.0.1:2222[0m
+[0m    lvm: SSH username: vagrant[0m
+[0m    lvm: SSH auth method: private key[0m
+[1m==> lvm: Machine booted and ready![0m
+[1m==> lvm: Machine already provisioned. Run `vagrant provision` or use the `--provision`
+==> lvm: flag to force provisioning. Provisioners marked to run always will still run.[0m
+]0;falcon@ubuntu-pc: ~/OTUS-Linux-2023-04-L3[01;32mfalcon@ubuntu-pc[00m:[01;34m~/OTUS-Linux-2023-04-L3[00m$ vagrant upsuspend[4Psh
+Last login: Tue May 23 19:19:33 2023 from 10.0.2.2
+
+]0;vagrant@lvm:~[?1034h[vagrant@lvm ~]$ lsb
+-bash: lsb: command not found
+]0;vagrant@lvm:~[vagrant@lvm ~]$ lsblk 
+NAME                     MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sda                        8:0    0   40G  0 disk 
+├─sda1                     8:1    0    1M  0 part 
+├─sda2                     8:2    0    1G  0 part /boot
+└─sda3                     8:3    0   39G  0 part 
+  ├─VolGroup00-LogVol00  253:0    0    8G  0 lvm  /
+  └─VolGroup00-LogVol01  253:1    0  1.5G  0 lvm  [SWAP]
+sdb                        8:16   0   10G  0 disk 
+└─VG--ROOT-lv--root      253:2    0   10G  0 lvm  
+sdc                        8:32   0    2G  0 disk 
+sdd                        8:48   0    1G  0 disk 
+├─vg_var-lv_var_rmeta_0  253:3    0    4M  0 lvm  
+│ └─vg_var-lv_var        253:7    0  952M  0 lvm  /var
+└─vg_var-lv_var_rimage_0 253:4    0  952M  0 lvm  
+  └─vg_var-lv_var        253:7    0  952M  0 lvm  /var
+sde                        8:64   0    1G  0 disk 
+├─vg_var-lv_var_rmeta_1  253:5    0    4M  0 lvm  
+│ └─vg_var-lv_var        253:7    0  952M  0 lvm  /var
+└─vg_var-lv_var_rimage_1 253:6    0  952M  0 lvm  
+  └─vg_var-lv_var        253:7    0  952M  0 lvm  /var
+]0;vagrant@lvm:~[vagrant@lvm ~]$ lgroup[K[K[K[K[K[Kvgremove VG--ROOT[1PROOT
+  WARNING: Running as a non-root user. Functionality may be unavailable.
+  /run/lvm/lvmetad.socket: access failed: Permission denied
+  WARNING: Failed to connect to lvmetad. Falling back to device scanning.
+  /dev/mapper/control: open failed: Permission denied
+  Failure to communicate with kernel device-mapper driver.
+  Incompatible libdevmapper 1.02.146-RHEL7 (2018-01-22) and kernel driver (unknown version).
+  /run/lock/lvm/V_VG-ROOT:aux: open failed: Permission denied
+  Can't get lock for VG-ROOT
+  Cannot process volume group VG-ROOT
+]0;vagrant@lvm:~[vagrant@lvm ~]$ sudo -i
+]0;root@lvm:~[?1034h[root@lvm ~]# exitshutdown -r 0cat /etc/fstab [2Pshutdown -r 0exit[K[Kvgremove VG--ROOT[1PROOT
+Do you really want to remove volume group "VG-ROOT" containing 1 logical volumes? [y/n]: y
+Do you really want to remove active logical volume VG-ROOT/lv-root? [y/n]: y
+  Logical volume "lv-root" successfully removed
+  Volume group "VG-ROOT" successfully removed
+]0;root@lvm:~[root@lvm ~]# vgremove VG-ROOT
+[C[C[C[C[C[C[C[C[C[C[C[C[C[Cexit[Kshutdown -r 0cat /etc/fstab echo "`blkid | grep var: | awk '{print $2}'` /var ext4 defaults 0 0" >> /etc/fstab
+[C[C[C[C[C[C[C[C[C[C[C[C[C[C[Klsblk 
+NAME                     MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sda                        8:0    0   40G  0 disk 
+├─sda1                     8:1    0    1M  0 part 
+├─sda2                     8:2    0    1G  0 part /boot
+└─sda3                     8:3    0   39G  0 part 
+  ├─VolGroup00-LogVol00  253:0    0    8G  0 lvm  /
+  └─VolGroup00-LogVol01  253:1    0  1.5G  0 lvm  [SWAP]
+sdb                        8:16   0   10G  0 disk 
+sdc                        8:32   0    2G  0 disk 
+sdd                        8:48   0    1G  0 disk 
+├─vg_var-lv_var_rmeta_0  253:3    0    4M  0 lvm  
+│ └─vg_var-lv_var        253:7    0  952M  0 lvm  /var
+└─vg_var-lv_var_rimage_0 253:4    0  952M  0 lvm  
+  └─vg_var-lv_var        253:7    0  952M  0 lvm  /var
+sde                        8:64   0    1G  0 disk 
+├─vg_var-lv_var_rmeta_1  253:5    0    4M  0 lvm  
+│ └─vg_var-lv_var        253:7    0  952M  0 lvm  /var
+└─vg_var-lv_var_rimage_1 253:6    0  952M  0 lvm  
+  └─vg_var-lv_var        253:7    0  952M  0 lvm  /var
+]0;root@lvm:~[root@lvm ~]# 
+]0;root@lvm:~[root@lvm ~]# pvs
+  PV         VG         Fmt  Attr PSize    PFree  
+  /dev/sda3  VolGroup00 lvm2 a--   <38.97g <29.47g
+  /dev/sdb              lvm2 ---    10.00g  10.00g
+  /dev/sdd   vg_var     lvm2 a--  1020.00m  64.00m
+  /dev/sde   vg_var     lvm2 a--  1020.00m  64.00m
+]0;root@lvm:~[root@lvm ~]# lvcreate -n LogVol_Home -L 2G /dev/VolGroup00
+  Logical volume "LogVol_Home" created.
+]0;root@lvm:~[root@lvm ~]# 
+]0;root@lvm:~[root@lvm ~]# 
+]0;root@lvm:~[root@lvm ~]# lvcreate -n LogVol_Home -L 2G /dev/VolGroup00
+[C[C[C[C[C[C[C[C[C[C[C[C[C[Cpvs[K
+  PV         VG         Fmt  Attr PSize    PFree  
+  /dev/sda3  VolGroup00 lvm2 a--   <38.97g <27.47g
+  /dev/sdb              lvm2 ---    10.00g  10.00g
+  /dev/sdd   vg_var     lvm2 a--  1020.00m  64.00m
+  /dev/sde   vg_var     lvm2 a--  1020.00m  64.00m
+]0;root@lvm:~[root@lvm ~]# pvs[Kbgs[K[K[Kvgs
+  VG         #PV #LV #SN Attr   VSize   VFree  
+  VolGroup00   1   3   0 wz--n- <38.97g <27.47g
+  vg_var       2   1   0 wz--n-   1.99g 128.00m
+]0;root@lvm:~[root@lvm ~]# vgs[K[K[Klvs
+  LV          VG         Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+  LogVol00    VolGroup00 -wi-ao----   8.00g                                                    
+  LogVol01    VolGroup00 -wi-ao----   1.50g                                                    
+  LogVol_Home VolGroup00 -wi-a-----   2.00g                                                    
+  lv_var      vg_var     rwi-aor--- 952.00m                                    100.00          
+]0;root@lvm:~[root@lvm ~]# 
+]0;root@lvm:~[root@lvm ~]# mkfs.xfs /dev/VolGroup00/LogVol_Home
+meta-data=/dev/VolGroup00/LogVol_Home isize=512    agcount=4, agsize=131072 blks
+         =                       sectsz=512   attr=2, projid32bit=1
+         =                       crc=1        finobt=0, sparse=0
+data     =                       bsize=4096   blocks=524288, imaxpct=25
+         =                       sunit=0      swidth=0 blks
+naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
+log      =internal log           bsize=4096   blocks=2560, version=2
+         =                       sectsz=512   sunit=0 blks, lazy-count=1
+realtime =none                   extsz=4096   blocks=0, rtextents=0
+]0;root@lvm:~[root@lvm ~]# 
+]0;root@lvm:~[root@lvm ~]# mount /dev/VolGroup00/LogVol_Home /mnt/
+]0;root@lvm:~[root@lvm ~]# 
+]0;root@lvm:~[root@lvm ~]# ls -l /mnt/
+total 0
+]0;root@lvm:~[root@lvm ~]# cp -aR /home/* /mnt/
+]0;root@lvm:~[root@lvm ~]# cp -aR /home/* /mnt/
+[C[C[C[C[C[C[C[C[C[C[C[C[C[C[9Pls -l[C[C[C[C[C[C
+total 0
+drwx------. 3 vagrant vagrant 95 May 23 19:13 [0m[38;5;27mvagrant[0m
+]0;root@lvm:~[root@lvm ~]# rm -rf /home/*
+]0;root@lvm:~[root@lvm ~]# umn[Kount /mt[Knt/
+]0;root@lvm:~[root@lvm ~]# mount[K[K[K[K[Kmount /dev/VolGroup00/LogVol_Home /home/
+]0;root@lvm:~[root@lvm ~]# ls -l /home/
+total 0
+drwx------. 3 vagrant vagrant 95 May 23 19:13 [0m[38;5;27mvagrant[0m
+]0;root@lvm:~[root@lvm ~]# ls -l /home/[28@mount /dev/VolGroup00/LogVol_Home[C[C[C[C[C[C[C
+[C[C[C[C[C[C[C[C[C[C[C[C[C[Cumount /mnt/[Krm -rf /home/*[3Pls -l /mnt/
+total 0
+]0;root@lvm:~[root@lvm ~]# echo "`blkid | grep Home | awk '{print $2}'` /home xfs defaults 0 0" >> /etc/fstab
+]0;root@lvm:~[root@lvm ~]# cat /etc/fstab 
+
+#
+# /etc/fstab
+# Created by anaconda on Sat May 12 18:50:26 2018
+#
+# Accessible filesystems, by reference, are maintained under '/dev/disk'
+# See man pages fstab(5), findfs(8), mount(8) and/or blkid(8) for more info
+#
+/dev/mapper/VolGroup00-LogVol00 /                       xfs     defaults        0 0
+UUID=570897ca-e759-4c81-90cf-389da6eee4cc /boot                   xfs     defaults        0 0
+/dev/mapper/VolGroup00-LogVol01 swap                    swap    defaults        0 0
+#VAGRANT-BEGIN
+# The contents below are automatically generated by Vagrant. Do not modify.
+#VAGRANT-END
+UUID="eb95b097-e31f-4eeb-b4fc-5022dab48d72" /var ext4 defaults 0 0
+UUID="55c3a37d-dc73-4868-ac74-050c7128c0ae" /home xfs defaults 0 0
+]0;root@lvm:~[root@lvm ~]# touch /home/file{1..20}
+]0;root@lvm:~[root@lvm ~]# touch /home/file{1..20}
+[C[C[C[C[C[C[C[C[C[C[C[C[C[C[8Pcat /etc/fstab echo "`blkid | grep Home | awk '{print $2}'` /home xfs defaults 0 0" >> /etc/fstab
+[C[C[C[C[C[C[C[C[C[C[C[C[C[Cls -l /mnt/[Khome/
+total 0
+-rw-r--r--. 1 root    root     0 May 23 20:12 file1
+-rw-r--r--. 1 root    root     0 May 23 20:12 file10
+-rw-r--r--. 1 root    root     0 May 23 20:12 file11
+-rw-r--r--. 1 root    root     0 May 23 20:12 file12
+-rw-r--r--. 1 root    root     0 May 23 20:12 file13
+-rw-r--r--. 1 root    root     0 May 23 20:12 file14
+-rw-r--r--. 1 root    root     0 May 23 20:12 file15
+-rw-r--r--. 1 root    root     0 May 23 20:12 file16
+-rw-r--r--. 1 root    root     0 May 23 20:12 file17
+-rw-r--r--. 1 root    root     0 May 23 20:12 file18
+-rw-r--r--. 1 root    root     0 May 23 20:12 file19
+-rw-r--r--. 1 root    root     0 May 23 20:12 file2
+-rw-r--r--. 1 root    root     0 May 23 20:12 file20
+-rw-r--r--. 1 root    root     0 May 23 20:12 file3
+-rw-r--r--. 1 root    root     0 May 23 20:12 file4
+-rw-r--r--. 1 root    root     0 May 23 20:12 file5
+-rw-r--r--. 1 root    root     0 May 23 20:12 file6
+-rw-r--r--. 1 root    root     0 May 23 20:12 file7
+-rw-r--r--. 1 root    root     0 May 23 20:12 file8
+-rw-r--r--. 1 root    root     0 May 23 20:12 file9
+drwx------. 3 vagrant vagrant 95 May 23 19:13 [0m[38;5;27mvagrant[0m
+]0;root@lvm:~[root@lvm ~]# lvcreate -L 100MB -s -n home_snap /dev/VolGroup00/LogVol_Home
+  Rounding up size to full physical extent 128.00 MiB
+  Logical volume "home_snap" created.
+]0;root@lvm:~[root@lvm ~]# rm -f /home/file{11..20}
+]0;root@lvm:~[root@lvm ~]# rm -f /home/file{11..20}
+[C[C[C[C[C[C[C[C[C[C[C[C[C[Clvcreate -L 100MB -s -n home_snap /dev/VolGroup00/LogVol_Home
+[C[C[C[C[C[C[C[C[C[C[C[C[C[C[Cs -l /home/[K
+total 0
+-rw-r--r--. 1 root    root     0 May 23 20:12 file1
+-rw-r--r--. 1 root    root     0 May 23 20:12 file10
+-rw-r--r--. 1 root    root     0 May 23 20:12 file2
+-rw-r--r--. 1 root    root     0 May 23 20:12 file3
+-rw-r--r--. 1 root    root     0 May 23 20:12 file4
+-rw-r--r--. 1 root    root     0 May 23 20:12 file5
+-rw-r--r--. 1 root    root     0 May 23 20:12 file6
+-rw-r--r--. 1 root    root     0 May 23 20:12 file7
+-rw-r--r--. 1 root    root     0 May 23 20:12 file8
+-rw-r--r--. 1 root    root     0 May 23 20:12 file9
+drwx------. 3 vagrant vagrant 95 May 23 19:13 [0m[38;5;27mvagrant[0m
+]0;root@lvm:~[root@lvm ~]# umount /home
+]0;root@lvm:~[root@lvm ~]# lvconvert --merge /dev/VolGroup00/home_snap
+  Merging of volume VolGroup00/home_snap started.
+  VolGroup00/LogVol_Home: Merged: 100.00%
+]0;root@lvm:~[root@lvm ~]# mount /home
+]0;root@lvm:~[root@lvm ~]# mount /homelvconvert --merge /dev/VolGroup00/home_snap
+[C[C[C[C[C[C[C[C[C[C[C[C[C[Cumount /home[Kls -l /home/
+total 0
+-rw-r--r--. 1 root    root     0 May 23 20:12 file1
+-rw-r--r--. 1 root    root     0 May 23 20:12 file10
+-rw-r--r--. 1 root    root     0 May 23 20:12 file11
+-rw-r--r--. 1 root    root     0 May 23 20:12 file12
+-rw-r--r--. 1 root    root     0 May 23 20:12 file13
+-rw-r--r--. 1 root    root     0 May 23 20:12 file14
+-rw-r--r--. 1 root    root     0 May 23 20:12 file15
+-rw-r--r--. 1 root    root     0 May 23 20:12 file16
+-rw-r--r--. 1 root    root     0 May 23 20:12 file17
+-rw-r--r--. 1 root    root     0 May 23 20:12 file18
+-rw-r--r--. 1 root    root     0 May 23 20:12 file19
+-rw-r--r--. 1 root    root     0 May 23 20:12 file2
+-rw-r--r--. 1 root    root     0 May 23 20:12 file20
+-rw-r--r--. 1 root    root     0 May 23 20:12 file3
+-rw-r--r--. 1 root    root     0 May 23 20:12 file4
+-rw-r--r--. 1 root    root     0 May 23 20:12 file5
+-rw-r--r--. 1 root    root     0 May 23 20:12 file6
+-rw-r--r--. 1 root    root     0 May 23 20:12 file7
+-rw-r--r--. 1 root    root     0 May 23 20:12 file8
+-rw-r--r--. 1 root    root     0 May 23 20:12 file9
+drwx------. 3 vagrant vagrant 95 May 23 19:13 [0m[38;5;27mvagrant[0m
+]0;root@lvm:~[root@lvm ~]# lsblk 
+NAME                       MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sda                          8:0    0   40G  0 disk 
+├─sda1                       8:1    0    1M  0 part 
+├─sda2                       8:2    0    1G  0 part /boot
+└─sda3                       8:3    0   39G  0 part 
+  ├─VolGroup00-LogVol00    253:0    0    8G  0 lvm  /
+  ├─VolGroup00-LogVol01    253:1    0  1.5G  0 lvm  [SWAP]
+  └─VolGroup00-LogVol_Home 253:2    0    2G  0 lvm  /home
+sdb                          8:16   0   10G  0 disk 
+sdc                          8:32   0    2G  0 disk 
+sdd                          8:48   0    1G  0 disk 
+├─vg_var-lv_var_rmeta_0    253:3    0    4M  0 lvm  
+│ └─vg_var-lv_var          253:7    0  952M  0 lvm  /var
+└─vg_var-lv_var_rimage_0   253:4    0  952M  0 lvm  
+  └─vg_var-lv_var          253:7    0  952M  0 lvm  /var
+sde                          8:64   0    1G  0 disk 
+├─vg_var-lv_var_rmeta_1    253:5    0    4M  0 lvm  
+│ └─vg_var-lv_var          253:7    0  952M  0 lvm  /var
+└─vg_var-lv_var_rimage_1   253:6    0  952M  0 lvm  
+  └─vg_var-lv_var          253:7    0  952M  0 lvm  /var
+]0;root@lvm:~[root@lvm ~]# exit
+logout
+]0;vagrant@lvm:~[vagrant@lvm ~]$ exit
+logout
+Connection to 127.0.0.1 closed.
+
+]0;falcon@ubuntu-pc: ~/OTUS-Linux-2023-04-L3[01;32mfalcon@ubuntu-pc[00m:[01;34m~/OTUS-Linux-2023-04-L3[00m$ exit
+exit
+
+Script done on 2023-05-24 12:52:02+03:00 [COMMAND_EXIT_CODE="0"]
